@@ -1,0 +1,14 @@
+FROM existo/dovecot:2.3.6
+
+COPY files /
+
+RUN chmod 700 /opt/dovecot/env
+
+# NAME = nombre del servidor
+# SSL = ["yes"|"no"] si lleva SSL
+ENV NAME                 = "mail.midominio.com" \
+    SSL                  = "no" \
+    AUTH_DEBUG           = "no" \
+    AUTH_DEBUG_PASSWORDS = "no"
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

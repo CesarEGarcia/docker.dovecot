@@ -1,0 +1,70 @@
+FROM centos:7
+
+LABEL VERSION 2.2.36
+LABEL PIGEONHOLE 0.4.24
+
+RUN set -x \
+    && groupadd dovecot \
+    && groupadd dovenull \
+    && useradd -d /opt/dovecot -s /bin/false -g dovecot -M dovecot \
+    && useradd -d /opt/dovecot -s /bin/false -g dovenull -M dovenull \
+    \
+	&& yum -y install gcc \
+	&& yum -y install make \
+    && yum -y install wget \
+    && yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+    && yum -y install supervisor \
+    \
+    && cd /usr/local/src \
+    && wget https://www.dovecot.org/releases/2.2/dovecot-2.2.36.tar.gz \
+    && tar xzvf dovecot-2.2.36.tar.gz \
+    && rm dovecot-2.2.36.tar.gz \
+    && cd dovecot-2.2.36 \
+    && ./configure \
+        --prefix=/opt/dovecot \
+        --without-shadow \
+        --without-pam \
+        --without-gssapi \
+        --without-ldap \
+        --without-mysql \
+        --without-pgsql \
+        --without-sqlite \
+    \
+    && cd /usr/local/src/dovecot-2.2.36 \
+    && make \
+    && make install \
+    \
+    && cd .. \
+    && wget https://pigeonhole.dovecot.org/releases/2.2/dovecot-2.2-pigeonhole-0.4.24.tar.gz \
+    && tar xzvf dovecot-2.2-pigeonhole-0.4.24.tar.gz \
+    && rm dovecot-2.2-pigeonhole-0.4.24.tar.gz \
+    && cd dovecot-2.2-pigeonhole-0.4.24 \
+    && ./configure \
+        --prefix=/opt/dovecot-pigeonhole \
+        --with-dovecot=../dovecot-2.2.36 \
+    && make \
+    && make install \
+    \
+    && cd .. \
+    && rm -Rf /usr/local/src/dovecot-2.2.36 \
+    && rm -Rf /usr/local/src/dovecot-2.2-pigeonhole-0.4.24 \
+    \
+    && ln -s /opt/dovecot/bin/doveadm /usr/bin \
+    && ln -s /opt/dovecot/bin/doveconf /usr/bin \
+    \
+    && yum -y remove gcc \
+    && yum -y remove make \
+    && yum -y remove wget \
+    && yum clean all \
+    && rm -Rf /var/cache/yum 
+
+COPY files/ /
+
+# Expose 24
+Expose 143
+Expose 110
+# Expose 993
+# Expose 995
+
+#CMD ["/usr/sbin/init"]    
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
