@@ -65,6 +65,15 @@ COPY files /
 
 ENV NAME="mail.midominio.com" \
     SSL="no" \
+    AUTH="yes" \
+    PROTOCOLS="imap pop3 lmtp submission" \
+    POP3="yes" \
+    POP3S="yes" \
+    IMAP="yes" \
+    IMAPS="yes" \
+    LMTP="yes" \
+    SUBMISSION="no" \
+    SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
     AUTH_DEBUG_PASSWORDS="no"
 

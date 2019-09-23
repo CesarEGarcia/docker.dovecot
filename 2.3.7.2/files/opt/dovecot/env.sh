@@ -12,8 +12,19 @@ fi
 
 mv 10-master.conf 10-master.bak
 touch 10-master.conf
+mv 20-submission.conf 20-submission.bak
+touch 20-submission.conf
 mv auth-passwdfile.conf.ext auth-passwdfile.conf.ext.bak
 touch auth-passwdfile.conf.ext
+
+
+################
+# dovecot.conf
+################
+echo "" >> ../local.conf
+echo "protocols = ${PROTOCOLS}" >> ../local.conf
+echo "" >> ../local.conf
+
 
 ################
 # 10-auth.conf
@@ -50,56 +61,88 @@ sed 's|#mail_location =|mail_location = mdbox:~/mdbox|' -i 10-mail.conf
 ##################
 # 10-master.conf
 ##################
-echo "
-service imap-login {
-    inet_listener imap {
-        #port = 143
-    }
+echo "" >> 10-master.conf
+echo "service imap-login {" >> 10-master.conf
+echo -e "\tservice_count = 0" >> 10-master.conf
+echo -e "\tprocess_min_avail = 4" >> 10-master.conf
+echo -e "\tvsz_limit = 1G" >> 10-master.conf
+echo -e "\tinet_listener imap {" >> 10-master.conf
 
-    inet_listener imaps {
-        #port = 993
-        #ssl = yes
-    }
-}
-" >> 10-master.conf
+if [ "$IMAP" = "yes" ]; then
+    echo -e "\t\tport = 143" >> 10-master.conf
+else
+    echo -e "\t\tport = 0" >> 10-master.conf
+fi
 
-echo "
-service pop3-login {
-    inet_listener pop3 {
-        #port = 110
-    }
-    inet_listener pop3s {
-        #port = 995
-        #ssl = yes
-    }
-}
-" >> 10-master.conf
+echo -e "\t}" >> 10-master.conf
+echo -e "\tinet_listener imaps {" >> 10-master.conf
 
-echo "
-service lmtp {
+if [ "$IMAPS" = "yes" ]; then
+    echo -e "\t\tport = 993" >> 10-master.conf
+else
+    echo -e "\t\tport = 0" >> 10-master.conf
+fi
 
-    # process_min_avail = 5
+echo -e "\t\tssl = yes" >> 10-master.conf
+echo -e "\t}" >> 10-master.conf
+echo -e "}" >> 10-master.conf
 
-    inet_listener lmtp {
-        port = 24
-    }
-}
-" >> 10-master.conf
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
 
-echo "
-service auth {
-    unix_listener auth-userdb {
-        #mode = 0666
-        #user =
-        #group =
-    }
+echo "service pop3-login {" >> 10-master.conf
+echo -e "\tservice_count = 0" >> 10-master.conf
+echo -e "\tinet_listener pop3 {" >> 10-master.conf
+if [ "$POP3" = "yes" ]; then
+    echo -e "\t\tport = 110" >> 10-master.conf
+else
+    echo -e "\t\tport = 0" >> 10-master.conf
+fi
 
-    inet_listener {
-        port = 26
-    }
-}
-" >> 10-master.conf
+echo -e "\t}" >> 10-master.conf
+echo -e "\tinet_listener pop3s {" >> 10-master.conf
+if [ "$POP3S" = "yes" ]; then
+    echo -e "\t\tport = 995" >> 10-master.conf
+else
+    echo -e "\t\tport = 0" >> 10-master.conf
+fi
+echo -e "\t\tssl = yes" >> 10-master.conf
+echo -e "\t}" >> 10-master.conf
+echo -e "}" >> 10-master.conf
 
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
+
+echo -e "service lmtp {" >> 10-master.conf
+echo -e "\t# process_min_avail = 5" >> 10-master.conf
+echo -e "\tinet_listener lmtp {" >> 10-master.conf
+if [ "$LMTP" = "yes" ]; then
+    echo -e "\t\tport = 24" >> 10-master.conf
+else
+    echo -e "\t\tport = 0" >> 10-master.conf
+fi
+echo -e "\t}" >> 10-master.conf
+echo -e "}" >> 10-master.conf
+
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
+
+if [ "$AUTH" = "yes" ]; then
+    echo -e "service auth {" >> 10-master.conf
+    echo -e "-tunix_listener auth-userdb {" >> 10-master.conf
+    echo -e "\t\t#mode = 0666" >> 10-master.conf
+    echo -e "\t\t#user =" >> 10-master.conf
+    echo -e "\t\t#group =" >> 10-master.conf
+    echo -e "\t}" >> 10-master.conf
+    echo -e "" >> 10-master.conf
+    echo -e "\tinet_listener {" >> 10-master.conf
+    echo -e "\t\tport = 26" >> 10-master.conf
+    echo -e "\t}" >> 10-master.conf
+    echo -e "}" >> 10-master.conf
+fi
+
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
 
 echo "
 service auth-worker {
@@ -134,6 +177,27 @@ fi
 # 20-lmtp.conf
 ################
 sed 's/#lmtp_proxy = no/lmtp_proxy = yes/' -i 20-lmtp.conf
+
+
+######################
+# 20-submission.conf
+######################
+
+echo "" >> 20-submission.conf
+echo "hostname = ${NAME}" >> 20-submission.conf
+echo "submission_client_workarounds = whitespace-before-path" >> 20-submission.conf
+# echo "submission_client_workarounds = whitespace-before-path mailbox-for-path" >> 20-submission.conf
+echo "submission_relay_host = ${SUBMISSION_HOST}" >> 20-submission.conf
+echo "submission_relay_port = 25" >> 20-submission.conf
+echo "submission_relay_trusted = yes" >> 20-submission.conf
+echo "" >> 20-submission.conf
+echo "" >> 20-submission.conf
+if [ "$SUBMISSION" = "yes" ]; then
+    echo "protocol submission {" >> 20-submission.conf
+    echo "}" >> 20-submission.conf
+fi
+echo "" >> 20-submission.conf
+echo "" >> 20-submission.conf
 
 
 ############################

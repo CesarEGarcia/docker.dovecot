@@ -2,8 +2,6 @@ FROM existo/dovecot:2.3.6
 
 COPY files /
 
-RUN chmod 700 /opt/dovecot/env
-
 # NAME = nombre del servidor
 # SSL = ["yes"|"no"] si lleva SSL
 ENV NAME                 = "mail.midominio.com" \
