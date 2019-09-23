@@ -184,15 +184,15 @@ sed 's/#lmtp_proxy = no/lmtp_proxy = yes/' -i 20-lmtp.conf
 ######################
 
 echo "" >> 20-submission.conf
-echo "hostname = ${NAME}" >> 20-submission.conf
-echo "submission_client_workarounds = whitespace-before-path" >> 20-submission.conf
-# echo "submission_client_workarounds = whitespace-before-path mailbox-for-path" >> 20-submission.conf
-echo "submission_relay_host = ${SUBMISSION_HOST}" >> 20-submission.conf
-echo "submission_relay_port = 25" >> 20-submission.conf
-echo "submission_relay_trusted = yes" >> 20-submission.conf
-echo "" >> 20-submission.conf
-echo "" >> 20-submission.conf
 if [ "$SUBMISSION" = "yes" ]; then
+    echo "hostname = ${NAME}" >> 20-submission.conf
+    echo "submission_client_workarounds = whitespace-before-path" >> 20-submission.conf
+    # echo "submission_client_workarounds = whitespace-before-path mailbox-for-path" >> 20-submission.conf
+    echo "submission_relay_host = ${SUBMISSION_HOST}" >> 20-submission.conf
+    echo "submission_relay_port = 25" >> 20-submission.conf
+    echo "submission_relay_trusted = yes" >> 20-submission.conf
+    echo "" >> 20-submission.conf
+    echo "" >> 20-submission.conf
     echo "protocol submission {" >> 20-submission.conf
     echo "}" >> 20-submission.conf
 fi
