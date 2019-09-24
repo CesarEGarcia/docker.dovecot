@@ -129,7 +129,7 @@ echo "" >> 10-master.conf
 
 if [ "$AUTH" = "yes" ]; then
     echo -e "service auth {" >> 10-master.conf
-    echo -e "-tunix_listener auth-userdb {" >> 10-master.conf
+    echo -e "\tunix_listener auth-userdb {" >> 10-master.conf
     echo -e "\t\t#mode = 0666" >> 10-master.conf
     echo -e "\t\t#user =" >> 10-master.conf
     echo -e "\t\t#group =" >> 10-master.conf
