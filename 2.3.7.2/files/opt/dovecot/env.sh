@@ -10,20 +10,24 @@ if [ -f env.sh ]; then
     exit 0
 fi
 
-mv 10-master.conf 10-master.bak
+mkdir bak
+mv 10-master.conf bak/10-master.bak
 touch 10-master.conf
-mv 20-submission.conf 20-submission.bak
+mv 20-submission.conf bak/20-submission.bak
 touch 20-submission.conf
-mv auth-passwdfile.conf.ext auth-passwdfile.conf.ext.bak
+mv auth-passwdfile.conf.ext bak/auth-passwdfile.conf.ext.bak
 touch auth-passwdfile.conf.ext
+mv 20-imap.conf bak/20-imap.conf.bak
+mv 20-lmtp.conf bak/20-lmtp.conf.bak
+mv 20-pop3.conf bak/20-pop3.conf.bak
 
 
 ################
 # dovecot.conf
 ################
-echo "" >> ../local.conf
-echo "protocols = ${PROTOCOLS}" >> ../local.conf
-echo "" >> ../local.conf
+# echo "" >> ../local.conf
+# echo "protocols = ${PROTOCOLS}" >> ../local.conf
+# echo "" >> ../local.conf
 
 
 ################
@@ -174,17 +178,84 @@ fi
 
 
 ################
+# 20-imap.conf
+################
+
+if [ "$IMAP" = "yes" ]; then
+    echo -e "protocols = $protocols imap" >> 20-imap.conf
+    echo -e "" >> 20-imap.conf
+    echo -e "protocol imap {" >> 20-imap.conf
+    echo -e "}" >> 20-imap.conf
+    echo -e "" >> 20-imap.conf
+    echo -e "" >> 20-imap.conf
+fi
+
+
+################
 # 20-lmtp.conf
 ################
-sed 's/#lmtp_proxy = no/lmtp_proxy = yes/' -i 20-lmtp.conf
+
+if [ "$LMTP" = "yes" ]; then
+    echo -e "protocols = $protocols lmtp" >> 20-lmtp.conf
+    echo -e "" >> 20-lmtp.conf
+    echo -e "lmtp_proxy = yes" >> 20-lmtp.conf
+    echo -e "" >> 20-lmtp.conf
+    echo -e "" >> 20-lmtp.conf
+    echo -e "protocol lmtp {" >> 20-lmtp.conf
+    if [ "$SIEVE" = "yes" ]; then
+        echo -e "\tmail_plugins = $mail_plugins sieve" >> 20-lmtp.conf
+    fi
+    echo -e "}" >> 20-lmtp.conf
+    echo -e "" >> 20-lmtp.conf
+    echo -e "" >> 20-lmtp.conf
+fi
+
+
+#######################
+# 20-managesieve.conf
+#######################
+
+if [ "$SIEVE" = "yes" ]; then
+    echo -e "" >> 20-managesieve.conf
+    echo -e "protocols = $protocols sieve" >> 20-managesieve.conf
+    echo -e "" >> 20-managesieve.conf
+    echo -e "service managesieve-login {" >> 20-managesieve.conf
+    echo -e "\tinet_listener sieve {" >> 20-managesieve.conf
+    echo -e "\t\tport = 4190" >> 20-managesieve.conf
+    echo -e "\t}" >> 20-managesieve.conf
+    echo -e "}" >> 20-managesieve.conf
+    echo -e "" >> 20-managesieve.conf
+    echo -e "" >> 20-managesieve.conf
+    echo -e "service managesieve {" >> 20-managesieve.conf
+    echo -e "}" >> 20-managesieve.conf
+    echo -e "" >> 20-managesieve.conf
+    echo -e "" >> 20-managesieve.conf
+fi
+
+
+################
+# 20-pop3.conf
+################
+
+if [ "$POP3" = "yes" ]; then
+    echo -e "protocols = $protocols pop3" >> 20-pop3.conf
+    echo -e "" >> 20-pop3.conf
+    echo -e "protocol pop3 {" >> 20-pop3.conf
+    echo -e "}" >> 20-pop3.conf
+    echo -e "" >> 20-pop3.conf
+    echo -e "" >> 20-pop3.conf
+fi
 
 
 ######################
 # 20-submission.conf
 ######################
 
-echo "" >> 20-submission.conf
 if [ "$SUBMISSION" = "yes" ]; then
+    echo "" >> 20-submission.conf
+    echo -e "protocols = $protocols submission" >> 20-managesieve.conf
+    echo "" >> 20-submission.conf
+    echo "" >> 20-submission.conf
     echo "hostname = ${NAME}" >> 20-submission.conf
     echo "submission_client_workarounds = whitespace-before-path" >> 20-submission.conf
     # echo "submission_client_workarounds = whitespace-before-path mailbox-for-path" >> 20-submission.conf
@@ -195,9 +266,33 @@ if [ "$SUBMISSION" = "yes" ]; then
     echo "" >> 20-submission.conf
     echo "protocol submission {" >> 20-submission.conf
     echo "}" >> 20-submission.conf
+    echo "" >> 20-submission.conf
+    echo "" >> 20-submission.conf
 fi
-echo "" >> 20-submission.conf
-echo "" >> 20-submission.conf
+
+#######################
+# 90-sieve.conf
+#######################
+
+if [ "$SIEVE" = "yes" ]; then
+    echo -e "" >> 90-sieve.conf
+    echo -e "protocol sieve {" >> 90-sieve.conf
+    echo -e "\tmanagesieve_max_line_length = 65536" >> 90-sieve.conf
+    echo -e "\tmanagesieve_implementation_string = dovecot" >> 90-sieve.conf
+    echo -e "\t# log_path = /var/log/dovecot-sieve-errors.log" >> 90-sieve.conf
+    echo -e "\t# info_log_path = /var/log/dovecot-sieve.log" >> 90-sieve.conf
+    echo -e "}" >> 90-sieve.conf
+    echo -e "" >> 90-sieve.conf
+    echo -e "" >> 90-sieve.conf
+    echo -e "plugin {" >> 90-sieve.conf
+    echo -e "\tsieve = ~/dovecot.sieve" >> 90-sieve.conf
+    echo -e "\tsieve_global_path = /etc/dovecot/sieve/default.sieve" >> 90-sieve.conf
+    echo -e "\tsieve_dir = ~/sieve" >> 90-sieve.conf
+    echo -e "\tsieve_global_dir = /etc/dovecot/sieve" >> 90-sieve.conf
+    echo -e "}" >> 90-sieve.conf
+    echo -e "" >> 90-sieve.conf
+    echo -e "" >> 90-sieve.conf
+fi
 
 
 ############################

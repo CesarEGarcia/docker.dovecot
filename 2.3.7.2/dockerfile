@@ -3,6 +3,7 @@ FROM centos:7
 LABEL VERSION 2.3.7.2
 
 RUN set -x \
+    && yum update -y \
     && groupadd -g 89 postfix \
     && groupadd -g 90 postdrop \
     && useradd -u 89 -g postfix -d /opt/postfix -s /sbin/nologin -M postfix \
@@ -17,8 +18,6 @@ RUN set -x \
 	&& yum -y install make \
     && yum -y install wget \
     && yum -y install openssl-devel \
-    && yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-    && yum -y install supervisor \
     \
     && cd /usr/local/src \
     && wget https://dovecot.org/releases/2.3/dovecot-2.3.7.2.tar.gz \
@@ -39,21 +38,20 @@ RUN set -x \
     && make \
     && make install \
     \
-    && echo PATH=/opt/dovecot/bin/:/opt/dovecot/sbin/:$PATH > /etc/profile.d/path.sh \
+    && cd /usr/local/src \
+    && wget https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
+    && tar xzvf dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
+    && rm dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
+    && cd dovecot-2.3-pigeonhole-0.5.7.2 \
+    && ./configure \
+        --prefix=/opt/pigeonhole \
+        --with-dovecot=/opt/dovecot/lib/dovecot \
+    && make \
+    && make install \
+    \
     && cp -av /opt/dovecot/share/doc/dovecot/example-config/* /opt/dovecot/etc/dovecot \
     && mkdir /var/log/dovecot \
     && chown dovecot.dovecot /var/log/dovecot \
-    \
-    && cd /tmp \
-    && curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" \
-    && python get-pip.py \
-    && rm /tmp/get-pip.py \
-    && pip install -U certbot \
-    && pip install --upgrade setuptools \
-    && echo "#!/bin/bash" >> /usr/local/bin/certbot \
-    && echo "" >> /usr/local/bin/certbot \
-    && echo "/usr/bin/certbot certonly --standalone \$@" >> /usr/local/bin/certbot \
-    && chmod 755 /usr/local/bin/certbot \
     \
     && yum -y remove gcc \
     && yum -y remove make \
@@ -66,12 +64,12 @@ COPY files /
 ENV NAME="mail.midominio.com" \
     SSL="no" \
     AUTH="yes" \
-    PROTOCOLS="imap pop3 lmtp submission" \
     POP3="yes" \
     POP3S="yes" \
     IMAP="yes" \
     IMAPS="yes" \
     LMTP="yes" \
+    SIEVE="yes" \
     SUBMISSION="no" \
     SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
@@ -82,5 +80,7 @@ ENV NAME="mail.midominio.com" \
 #       - /etc/letsencrypt:/etc/letsencrypt
 #       - ./etc:/opt/dovecot/conf
 #       - ./log:/var/log/dovecot
+
+WORKDIR /opt/dovecot
 
 CMD /opt/dovecot/env.sh && /opt/dovecot/sbin/dovecot -F
