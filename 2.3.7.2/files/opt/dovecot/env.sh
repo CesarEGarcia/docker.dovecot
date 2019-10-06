@@ -25,9 +25,7 @@ mv 20-pop3.conf bak/20-pop3.conf.bak
 ################
 # dovecot.conf
 ################
-# echo "" >> ../local.conf
-# echo "protocols = ${PROTOCOLS}" >> ../local.conf
-# echo "" >> ../local.conf
+sed 's/^#protocols =.*/protocols = /' -i ../dovecot.conf
 
 
 ################
@@ -172,6 +170,7 @@ if [ "$SSL" = "yes" ]; then
     sed 's|ssl_cert =.*|ssl_cert = </etc/letsencrypt/live/'${NAME}'/fullchain.pem|' -i 10-ssl.conf
     sed 's|ssl_key =.*|ssl_key = </etc/letsencrypt/live/'${NAME}'/privkey.pem|' -i 10-ssl.conf
 else
+    sed 's/#ssl = yes/ssl = no/' -i 10-ssl.conf
     sed 's|ssl_cert =.*|#ssl_cert = </etc/ssl/certs/dovecot.pem|' -i 10-ssl.conf
     sed 's|ssl_key =.*|#ssl_key = </etc/ssl/private/dovecot.pem|' -i 10-ssl.conf
 fi
@@ -182,7 +181,7 @@ fi
 ################
 
 if [ "$IMAP" = "yes" ]; then
-    echo -e "protocols = $protocols imap" >> 20-imap.conf
+    echo -e "protocols = \$protocols imap" >> 20-imap.conf
     echo -e "" >> 20-imap.conf
     echo -e "protocol imap {" >> 20-imap.conf
     echo -e "}" >> 20-imap.conf
@@ -196,7 +195,7 @@ fi
 ################
 
 if [ "$LMTP" = "yes" ]; then
-    echo -e "protocols = $protocols lmtp" >> 20-lmtp.conf
+    echo -e "protocols = \$protocols lmtp" >> 20-lmtp.conf
     echo -e "" >> 20-lmtp.conf
     echo -e "lmtp_proxy = yes" >> 20-lmtp.conf
     echo -e "" >> 20-lmtp.conf
@@ -217,7 +216,7 @@ fi
 
 if [ "$SIEVE" = "yes" ]; then
     echo -e "" >> 20-managesieve.conf
-    echo -e "protocols = $protocols sieve" >> 20-managesieve.conf
+    echo -e "protocols = \$protocols sieve" >> 20-managesieve.conf
     echo -e "" >> 20-managesieve.conf
     echo -e "service managesieve-login {" >> 20-managesieve.conf
     echo -e "\tinet_listener sieve {" >> 20-managesieve.conf
@@ -238,7 +237,7 @@ fi
 ################
 
 if [ "$POP3" = "yes" ]; then
-    echo -e "protocols = $protocols pop3" >> 20-pop3.conf
+    echo -e "protocols = \$protocols pop3" >> 20-pop3.conf
     echo -e "" >> 20-pop3.conf
     echo -e "protocol pop3 {" >> 20-pop3.conf
     echo -e "}" >> 20-pop3.conf
@@ -253,7 +252,7 @@ fi
 
 if [ "$SUBMISSION" = "yes" ]; then
     echo "" >> 20-submission.conf
-    echo -e "protocols = $protocols submission" >> 20-managesieve.conf
+    echo -e "protocols = \$protocols submission" >> 20-managesieve.conf
     echo "" >> 20-submission.conf
     echo "" >> 20-submission.conf
     echo "hostname = ${NAME}" >> 20-submission.conf
@@ -298,36 +297,35 @@ fi
 ############################
 # auth-passwdfile.conf.ext
 ############################
-sed 's|args = scheme=CRYPT username_format=%u /etc/dovecot/users|args = scheme=CRYPT username_format=%u /opt/dovecot/conf/passwords/%d|' -i auth-passwdfile.conf.ext
-sed 's|args = username_format=%u /etc/dovecot/users|args = username_format=%u /opt/dovecot/conf/passwords/%d|' -i auth-passwdfile.conf.ext
-echo "
-passdb {
-  driver = passwd-file
-  args = scheme=CRYPT username_format=%u /opt/dovecot/conf/passwords/%d
-}
+echo -e ""
+echo -e "passdb {" >> auth-passwdfile.conf.ext
+echo -e "\tdriver = passwd-file" >> auth-passwdfile.conf.ext
+echo -e "\targs = scheme=CRYPT username_format=%u /opt/dovecot/conf/passwords/%d" >> auth-passwdfile.conf.ext
+echo -e "}" >> auth-passwdfile.conf.ext
+echo -e "" >> auth-passwdfile.conf.ext
+echo -e "userdb {" >> auth-passwdfile.conf.ext
+echo -e "\tdriver = passwd-file" >> auth-passwdfile.conf.ext
+echo -e "\targs = username_format=%u /opt/dovecot/conf/passwords/%d" >> auth-passwdfile.conf.ext
+echo -e "}" >> auth-passwdfile.conf.ext
+echo -e "" >> auth-passwdfile.conf.ext
 
-userdb {
-  driver = passwd-file
-  args = username_format=%u /opt/dovecot/conf/passwords/%d
-}
+if [ "$MASTER_PASSWORD" = "yes" ]; then
+    echo -e "passdb {" >> auth-passwdfile.conf.ext
+    echo -e "\tdriver = passwd-file" >> auth-passwdfile.conf.ext
+    echo -e "\targs = /opt/dovecot/conf/passwords/master" >> auth-passwdfile.conf.ext
+    echo -e "\tmaster = yes" >> auth-passwdfile.conf.ext
+    echo -e "\tpass = yes" >> auth-passwdfile.conf.ext
+    echo -e "}" >> auth-passwdfile.conf.ext
+    echo -e "" >> auth-passwdfile.conf.ext
+fi
 
-passdb {
-  driver = passwd-file
-  args = /opt/dovecot/conf/passwords/master
-  master = yes
-  pass = yes
-}
+echo -e "" >> auth-passwdfile.conf.ext
+echo -e "auth_master_user_separator = *" >> auth-passwdfile.conf.ext
+echo -e "" >> auth-passwdfile.conf.ext
+echo -e "" >> auth-passwdfile.conf.ext
 
-passdb {
-    driver = passwd-file
-    args = /opt/dovecot/conf/passwords/master
-    master = yes
-    pass = yes
-}
 
-auth_master_user_separator = *
-
-" >> auth-passwdfile.conf.ext
+chown vmail.vmail /home/dominios
 
 echo "#Ya configurado" > env.sh
 

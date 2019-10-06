@@ -68,12 +68,15 @@ ENV NAME="mail.midominio.com" \
     POP3S="yes" \
     IMAP="yes" \
     IMAPS="yes" \
-    LMTP="yes" \
+    LMTP="no" \
     SIEVE="yes" \
     SUBMISSION="no" \
+    MASTER_PASSWORD="no" \
     SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
     AUTH_DEBUG_PASSWORDS="no"
+
+EXPOSE 24 110 143 587 943 953
 
 # volumes:
 #       - /home/dominios:/home/dominios
