@@ -180,7 +180,7 @@ fi
 # 20-imap.conf
 ################
 
-if [ "$IMAP" = "yes" ]; then
+if [ "$IMAP" = "yes" ] || [ "$IMAPS" = "yes" ]; then
     echo -e "protocols = \$protocols imap" >> 20-imap.conf
     echo -e "" >> 20-imap.conf
     echo -e "protocol imap {" >> 20-imap.conf
@@ -236,7 +236,7 @@ fi
 # 20-pop3.conf
 ################
 
-if [ "$POP3" = "yes" ]; then
+if [ "$POP3" = "yes" ] || [ "$POP3S" = "yes" ]; then
     echo -e "protocols = \$protocols pop3" >> 20-pop3.conf
     echo -e "" >> 20-pop3.conf
     echo -e "protocol pop3 {" >> 20-pop3.conf
