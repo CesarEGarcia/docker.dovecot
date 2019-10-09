@@ -71,12 +71,15 @@ ENV NAME="mail.midominio.com" \
     LMTP="no" \
     SIEVE="yes" \
     SUBMISSION="no" \
+    DOVEADM="no" \
+    DOVEADM_PORT="" \
+    DOVEADM_PASSWORD="" \
     MASTER_PASSWORD="no" \
     SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
     AUTH_DEBUG_PASSWORDS="no"
 
-EXPOSE 24 110 143 587 943 953
+EXPOSE 24 110 143 587 943 953 10005
 
 # volumes:
 #       - /home/dominios:/home/dominios

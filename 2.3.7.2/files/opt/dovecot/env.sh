@@ -151,6 +151,23 @@ service auth-worker {
 }
 " >> 10-master.conf
 
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
+
+if [ "$DOVEADM" = "yes" ]; then
+    echo -e "service doveadm {" >> 10-master.conf
+    echo -e "\tinet_listener {" >> 10-master.conf
+    echo -e "\t\tport = ${DOVEADM_PORT}" >> 10-master.conf
+    echo -e "\t}" >> 10-master.conf
+    echo -e "}" >> 10-master.conf
+    echo -e "doveadm_password = \"${DOVEADM_PASSWORD}\""  >> 10-master.conf
+fi
+
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
+
+
+
 echo "
 service dict {
     unix_listener dict {
