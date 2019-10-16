@@ -341,6 +341,10 @@ echo -e "auth_master_user_separator = *" >> auth-passwdfile.conf.ext
 echo -e "" >> auth-passwdfile.conf.ext
 echo -e "" >> auth-passwdfile.conf.ext
 
+echo -e "" >> /etc/ssmtp/ssmtp.conf
+echo -e "mailhub=${SIEVE_SMTP}" >> /etc/ssmtp/ssmtp.conf
+echo -e "UseSTARTTLS=NO" >> /etc/ssmtp/ssmtp.conf
+echo -e "" >> /etc/ssmtp/ssmtp.conf
 
 chown vmail.vmail /home/dominios
 
