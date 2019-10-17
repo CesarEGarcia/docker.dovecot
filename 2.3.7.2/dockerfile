@@ -20,8 +20,6 @@ RUN set -x \
     && yum -y install wget \
     && yum -y install openssl-devel \
     && yum install -y sendmail \
-    && yum install -y epel-release \
-    && yum install -y ssmtp \
     \
     && cd /usr/local/src \
     && wget https://dovecot.org/releases/2.3/dovecot-2.3.7.2.tar.gz \
@@ -55,16 +53,17 @@ RUN set -x \
     \
     && cp -av /opt/dovecot/share/doc/dovecot/example-config/* /opt/dovecot/etc/dovecot \
     && mkdir /var/log/dovecot \
-    && chown dovecot.dovecot /var/log/dovecot \
-    \
-    && /usr/sbin/alternatives --set mta /usr/sbin/sendmail.ssmtp \
-    \
-    && yum -y remove gcc \
-    && yum -y remove make \
-    && yum -y remove openssl-devel \
-    && yum -y remove wget \
-    && yum -y remove epel-release \
-    && yum clean all
+    && chown dovecot.dovecot /var/log/dovecot
+
+
+    # \
+    # && /usr/sbin/alternatives --set mta /usr/sbin/sendmail.ssmtp \
+    # \
+    # && yum -y remove gcc \
+    # && yum -y remove make \
+    # && yum -y remove openssl-devel \
+    # && yum -y remove wget \
+    # && yum clean all
 
 
 COPY files /
