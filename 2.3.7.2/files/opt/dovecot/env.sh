@@ -3,12 +3,13 @@
 # disable_plaintext_auth = yes no permite autenticacion sin SSL
 # disable_plaintext_auth = no permite autenticacion sin SSL
 #
+#
 
 cd /opt/dovecot/etc/dovecot/conf.d
 
 if [ -f env.sh ]; then
     if [ "$SIEVE" = "yes" ]; then
-        /opt/postfix/bin/postfix -c /opt/postfix/etc
+        /opt/postfix/bin/postfix -c /opt/postfix/etc start
     fi
     exit 0
 fi
@@ -361,5 +362,5 @@ if [ "$SIEVE" = "yes" ]; then
 fi
 
 
-#############
+###############
 exit 0
