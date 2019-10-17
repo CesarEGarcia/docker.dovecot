@@ -1,0 +1,25 @@
+compatibility_level    = 2
+queue_directory        = /opt/postfix/spool
+command_directory      = /opt/postfix/bin
+daemon_directory       = /opt/postfix/daemon
+data_directory         = /opt/postfix/data
+sendmail_path          = /usr/sbin/sendmail
+newaliases_path        = /opt/postfix/bin/newaliases
+mailq_path             = /opt/postfix/bin/mailq
+manpage_directory      = /usr/local/man
+sample_directory       = /opt/postfix/etc
+meta_directory         = /opt/postfix/etc
+html_directory         = no
+readme_directory       = no
+shlib_directory        = no
+mail_owner             = postfix
+setgid_group           = postdrop
+myhostname             = sieve.existo.net
+myorigin               = $myhostname
+mydestination          = $myhostname
+mynetworks             = 127.0.0.1
+inet_interfaces        = localhost
+inet_protocols         = ipv4
+bounce_queue_lifetime  = 4h
+maximal_queue_lifetime = 4h
+

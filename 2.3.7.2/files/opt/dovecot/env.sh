@@ -7,6 +7,9 @@
 cd /opt/dovecot/etc/dovecot/conf.d
 
 if [ -f env.sh ]; then
+    if [ "$SIEVE" = "yes" ]; then
+        /opt/postfix/bin/postfix -c /opt/postfix/etc
+    fi
     exit 0
 fi
 
@@ -341,14 +344,22 @@ echo -e "auth_master_user_separator = *" >> auth-passwdfile.conf.ext
 echo -e "" >> auth-passwdfile.conf.ext
 echo -e "" >> auth-passwdfile.conf.ext
 
-echo -e "" >> /etc/ssmtp/ssmtp.conf
-echo -e "mailhub=${SIEVE_SMTP}" >> /etc/ssmtp/ssmtp.conf
-echo -e "UseSTARTTLS=NO" >> /etc/ssmtp/ssmtp.conf
-echo -e "" >> /etc/ssmtp/ssmtp.conf
-
 chown vmail.vmail /home/dominios
 
+if [ "$SIEVE" = "yes" ]; then
+    echo -e "maillog_file          = /var/log/dovecot/sieve.${NAME}.log" >> /opt/postfix/etc/main.cf
+    echo -e "relayhost             = ${SIEVE_SMTP}" >> /opt/postfix/etc/main.cf
+    echo -e "smtp_sasl_auth_enable = no" >> /opt/postfix/etc/main.cf
+    echo -e "" >> /opt/postfix/etc/main.cf
+    echo -e "" >> /opt/postfix/etc/main.cf
+fi
+
 echo "#Ya configurado" > env.sh
+
+if [ "$SIEVE" = "yes" ]; then
+    /opt/postfix/bin/postfix -c /opt/postfix/etc start
+fi
+
 
 #############
 exit 0

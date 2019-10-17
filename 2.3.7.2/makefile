@@ -1,6 +1,5 @@
 NAME = dovecot
-# VERSION = 2.3.7.2
-VERSION = test
+VERSION = 2.3.7.2
 
 build:
 	docker image build -t ${NAME}:${VERSION} .

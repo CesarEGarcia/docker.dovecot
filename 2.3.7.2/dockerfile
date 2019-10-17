@@ -19,7 +19,11 @@ RUN set -x \
 	&& yum -y install make \
     && yum -y install wget \
     && yum -y install openssl-devel \
-    && yum install -y sendmail \
+	&& yum -y install m4 \
+    && yum -y install wget \
+    && yum -y install libdb-devel \
+    && yum -y install pcre-devel \
+    && yum -y install openssl-devel \
     \
     && cd /usr/local/src \
     && wget https://dovecot.org/releases/2.3/dovecot-2.3.7.2.tar.gz \
@@ -53,17 +57,45 @@ RUN set -x \
     \
     && cp -av /opt/dovecot/share/doc/dovecot/example-config/* /opt/dovecot/etc/dovecot \
     && mkdir /var/log/dovecot \
-    && chown dovecot.dovecot /var/log/dovecot
-
-
-    # \
-    # && /usr/sbin/alternatives --set mta /usr/sbin/sendmail.ssmtp \
-    # \
-    # && yum -y remove gcc \
-    # && yum -y remove make \
-    # && yum -y remove openssl-devel \
-    # && yum -y remove wget \
-    # && yum clean all
+    && chown dovecot.dovecot /var/log/dovecot \
+    \
+    \
+    && cd /usr/local/src \
+    && wget http://ftp.uma.es/mirror/postfix/src/official/postfix-3.4.7.tar.gz \
+    && tar xzvf postfix-3.4.7.tar.gz \
+    && rm postfix-3.4.7.tar.gz \
+    && cd postfix-3.4.7 \
+    \
+    && make makefiles CCARGS='-DDEF_CONFIG_DIR=\"/opt/postfix/etc\" \
+        -DDEF_COMMAND_DIR=\"/opt/postfix/bin\" \
+        -DDEF_DAEMON_DIR=\"/opt/postfix/daemon\" \
+        -DDEF_DATA_DIR=\"/opt/postfix/data\" \
+        -DDEF_MAILQ_PATH=\"/opt/postfix/bin/mailq\" \
+        -DDEF_NEWALIAS_PATH=\"/opt/postfix/bin/newaliases\" \
+        -DDEF_QUEUE_DIR=\"/opt/postfix/spool\" \
+        -DDEF_SENDMAIL_PATH=\"/usr/sbin/sendmail\" \
+        -DUSE_SASL_AUTH \
+        -DDEF_SERVER_SASL_TYPE=\"dovecot\" \
+        -DHAS_PCRE -I/usr/local/include \
+        -DUSE_TLS ' \
+        AUXLIBS='-lssl -lcrypto -lpcre' \
+    \
+    && make \
+    && make install -non-interactive \
+    && /bin/sh postfix-install -non-interactive \
+    \
+    && /opt/postfix/bin/newaliases \
+    && ln -s /opt/postfix/bin/postmap /usr/local/bin \
+    && echo PATH=/opt/postfix/bin/:$PATH > /etc/profile.d/path.sh \
+    \
+    \
+    && yum -y remove gcc \
+    && yum -y remove make \
+    && yum -y remove openssl-devel \
+    && yum -y remove wget \
+    && yum -y remove m4 \
+    && yum -y remove libdb-devel \
+    && yum clean all
 
 
 COPY files /
@@ -77,8 +109,8 @@ ENV NAME="mail.midominio.com" \
     IMAP="yes" \
     IMAPS="yes" \
     LMTP="no" \
-    SIEVE="yes" \
-    SIEVE_SMTP="localhost" \
+    SIEVE="no" \
+    SIEVE_SMTP="mx.existo.net" \
     SUBMISSION="no" \
     DOVEADM="no" \
     DOVEADM_PORT="" \
