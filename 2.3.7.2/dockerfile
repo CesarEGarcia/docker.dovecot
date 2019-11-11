@@ -118,7 +118,8 @@ ENV NAME="mail.midominio.com" \
     MASTER_PASSWORD="no" \
     SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
-    AUTH_DEBUG_PASSWORDS="no"
+    AUTH_DEBUG_PASSWORDS="no" \
+    AUTH_POLICY_SERVER=""
 
 EXPOSE 24 110 143 587 943 953 10005
 

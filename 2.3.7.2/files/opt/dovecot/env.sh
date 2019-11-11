@@ -39,6 +39,15 @@ sed 's/#disable_plaintext_auth = yes/disable_plaintext_auth = no/' -i 10-auth.co
 sed 's/^auth_mechanisms =.*/auth_mechanisms = plain login/' -i 10-auth.conf
 sed 's/!include auth-system.conf.ext/#!include auth-system.conf.ext/' -i 10-auth.conf
 sed 's/#!include auth-passwdfile.conf.ext/!include auth-passwdfile.conf.ext/' -i 10-auth.conf
+if [ "$AUTH_POLICY_SERVER" != "" ]; then
+    echo "" >> 10-auth.conf
+    echo -e "auth_policy_server_url = ${AUTH_POLICY_SERVER}" >> 10-auth.conf
+    echo -e "auth_policy_hash_nonce = localized_random_string" >> 10-auth.conf
+    echo -e "auth_policy_check_after_auth = no" >> 10-auth.conf
+    echo -e "auth_policy_report_after_auth = yes" >> 10-auth.conf
+    echo "" >> 10-auth.conf
+fi
+
 
 
 ###################
