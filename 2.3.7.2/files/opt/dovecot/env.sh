@@ -364,6 +364,7 @@ if [ "$SIEVE" = "yes" ]; then
     echo -e "" >> /opt/postfix/etc/main.cf
 fi
 
+
 echo "#Ya configurado" > env.sh
 
 if [ "$SIEVE" = "yes" ]; then
