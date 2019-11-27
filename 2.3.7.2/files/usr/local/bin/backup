@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+cd /home/dominios
+date
+
+for DOMINIO in *
+do
+	echo "Copiando $DOMINIO"
+	cd /home/dominios/$DOMINIO
+	for USER in *
+	do
+	    /opt/dovecot/bin/doveadm -v backup -u $USER@$DOMINIO tcp:backup.existo.net:10005
+	done
+done
+
+date
+
