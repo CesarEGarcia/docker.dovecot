@@ -344,7 +344,7 @@ if [ "$MASTER_PASSWORD" = "yes" ]; then
     echo -e "\tdriver = passwd-file" >> auth-passwdfile.conf.ext
     echo -e "\targs = /opt/dovecot/conf/master" >> auth-passwdfile.conf.ext
     echo -e "\tmaster = yes" >> auth-passwdfile.conf.ext
-    echo -e "\tpass = yes" >> auth-passwdfile.conf.ext
+    echo -e "\tresult_success = continue" >> auth-passwdfile.conf.ext
     echo -e "}" >> auth-passwdfile.conf.ext
     echo -e "" >> auth-passwdfile.conf.ext
 fi
