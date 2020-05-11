@@ -1,0 +1,4 @@
+https://doc.dovecot.org/configuration_manual/quota_plugin/
+https://wiki.dovecot.org/Quota/Count
+
+doveadm quota recalc -u <uid>

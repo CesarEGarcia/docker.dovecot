@@ -24,6 +24,8 @@ touch auth-passwdfile.conf.ext
 mv 20-imap.conf bak/20-imap.conf.bak
 mv 20-lmtp.conf bak/20-lmtp.conf.bak
 mv 20-pop3.conf bak/20-pop3.conf.bak
+mv 90-quota.conf bak/90-quota.conf.bak
+touch 90-quota.conf
 
 
 ################
@@ -178,18 +180,29 @@ fi
 
 echo "" >> 10-master.conf
 echo "" >> 10-master.conf
+echo -e "service dict {" >> 10-master.conf
+echo -e "\tunix_listener dict {" >> 10-master.conf
+echo -e "\t\t#mode = 0600" >> 10-master.conf
+echo -e "\t\t#user =" >> 10-master.conf
+echo -e "\t\t#group =" >> 10-master.conf
+echo -e "\t}" >> 10-master.conf
+echo -e "}" >> 10-master.conf
 
+if [ "$QUOTA_SERVICE" = "yes" ]; then
+    echo "" >> 10-master.conf
+    echo "" >> 10-master.conf
+    echo -e "service quota-status {" >> 10-master.conf
+    echo -e "\texecutable = quota-status -p postfix" >> 10-master.conf
+    echo -e "\tinet_listener {" >> 10-master.conf
+    echo -e "\t\tport = ${QUOTA_SERVICE_PORT}" >> 10-master.conf
+    echo -e "\t}" >> 10-master.conf
+    echo -e "\tclient_limit = 1" >> 10-master.conf
+    echo -e "}" >> 10-master.conf
+fi
 
+echo "" >> 10-master.conf
+echo "" >> 10-master.conf
 
-echo "
-service dict {
-    unix_listener dict {
-        #mode = 0600
-        #user =
-        #group =
-    }
-}
-" >> 10-master.conf
 
 
 ###############
@@ -214,6 +227,9 @@ if [ "$IMAP" = "yes" ] || [ "$IMAPS" = "yes" ]; then
     echo -e "protocols = \$protocols imap" >> 20-imap.conf
     echo -e "" >> 20-imap.conf
     echo -e "protocol imap {" >> 20-imap.conf
+    if [ ! -z "$QUOTA" ]; then
+        echo -e "\tmail_plugins = \$mail_plugins imap_quota" >> 20-imap.conf
+    fi
     echo -e "}" >> 20-imap.conf
     echo -e "" >> 20-imap.conf
     echo -e "" >> 20-imap.conf
@@ -232,7 +248,7 @@ if [ "$LMTP" = "yes" ]; then
     echo -e "" >> 20-lmtp.conf
     echo -e "protocol lmtp {" >> 20-lmtp.conf
     if [ "$SIEVE" = "yes" ]; then
-        echo -e "\tmail_plugins = $mail_plugins sieve" >> 20-lmtp.conf
+        echo -e "\tmail_plugins = \$mail_plugins sieve" >> 20-lmtp.conf
     fi
     echo -e "}" >> 20-lmtp.conf
     echo -e "" >> 20-lmtp.conf
@@ -298,6 +314,29 @@ if [ "$SUBMISSION" = "yes" ]; then
     echo "" >> 20-submission.conf
     echo "" >> 20-submission.conf
 fi
+
+
+#######################
+# 90-quota.conf
+#######################
+if [ ! -z "$QUOTA" ]; then
+    echo -e "" >> 90-quota.conf
+    echo -e "plugin {" >> 90-quota.conf
+    echo -e "\tquota = count:User quota" >> 90-quota.conf
+    echo -e "\tquota_rule = *:storage:$QUOTA" >> 90-quota.conf
+    echo -e "\tquota_vsizese = yes" >> 90-quota.conf
+    echo -e "\tquota_grace = 10%%" >> 90-quota.conf
+    echo -e "\tquota_status_success = DUNNO" >> 90-quota.conf
+    echo -e "\tquota_status_nouser = DUNNO" >> 90-quota.conf
+    echo -e "\tquota_status_overquota = \"552 5.2.2 Mailbox is full\"" >> 90-quota.conf
+    echo -e "}" >> 90-quota.conf
+    echo -e "" >> 90-quota.conf
+    echo -e "" >> 90-quota.conf
+    echo -e "\tmail_plugins = \$mail_plugins quota" >> 90-quota.conf
+    echo -e "" >> 90-quota.conf
+    echo -e "" >> 90-quota.conf
+fi
+
 
 #######################
 # 90-sieve.conf

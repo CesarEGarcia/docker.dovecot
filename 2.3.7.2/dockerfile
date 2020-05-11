@@ -119,7 +119,10 @@ ENV NAME="mail.midominio.com" \
     SUBMISSION_HOST="localhost" \
     AUTH_DEBUG="no" \
     AUTH_DEBUG_PASSWORDS="no" \
-    AUTH_POLICY_SERVER=""
+    AUTH_POLICY_SERVER="" \
+    QUOTA_SERVICE="yes" \
+    QUOTA_SERVICE_PORT="12341" \
+    QUOTA=100G
 
 EXPOSE 24 110 143 587 943 953 10005
 
