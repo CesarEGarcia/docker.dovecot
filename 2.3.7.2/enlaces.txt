@@ -1,4 +1,8 @@
 https://doc.dovecot.org/configuration_manual/quota_plugin/
 https://wiki.dovecot.org/Quota/Count
+https://wiki.dovecot.org/Quota/Configuration
+https://blog.sys4.de/postfix-dovecot-mailbox-quota-en.html
 
 doveadm quota recalc -u <uid>
+
+user:{plain}pass:1000:1000::/home/user::userdb_quota_rule=*:bytes=100M

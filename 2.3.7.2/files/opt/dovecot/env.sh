@@ -15,6 +15,8 @@ if [ -f env.sh ]; then
 fi
 
 mkdir bak
+mv 10-mail.conf bak/10-mail.bak
+touch 10-mail.conf
 mv 10-master.conf bak/10-master.bak
 touch 10-master.conf
 mv 20-submission.conf bak/20-submission.bak
@@ -72,7 +74,21 @@ fi
 ################
 # 10-mail.conf
 ################
-sed 's|#mail_location =|mail_location = mdbox:~/mdbox|' -i 10-mail.conf
+echo -e "" >> 10-mail.conf
+echo -e "mail_location = mdbox:~/mdbox" >> 10-mail.conf
+echo -e "" >> 10-mail.conf
+echo -e "namespace inbox {" >> 10-mail.conf
+echo -e "\tinbox = yes" >> 10-mail.conf
+echo -e "}" >> 10-mail.conf
+echo -e "" >> 10-mail.conf
+echo -e "mail_plugins = " >> 10-mail.conf
+if [ ! -z "$QUOTA" ]; then
+    echo -e "" >> 10-mail.conf
+    echo -e "mail_plugins = \$mail_plugins quota" >> 10-mail.conf
+fi
+echo "" >> 10-mail.conf
+echo "" >> 10-mail.conf
+
 
 
 ##################
@@ -323,16 +339,13 @@ if [ ! -z "$QUOTA" ]; then
     echo -e "" >> 90-quota.conf
     echo -e "plugin {" >> 90-quota.conf
     echo -e "\tquota = count:User quota" >> 90-quota.conf
-    echo -e "\tquota_rule = *:storage:$QUOTA" >> 90-quota.conf
-    echo -e "\tquota_vsizese = yes" >> 90-quota.conf
+    echo -e "\tquota_rule = *:storage=$QUOTA" >> 90-quota.conf
+    echo -e "\tquota_vsizes = yes" >> 90-quota.conf
     echo -e "\tquota_grace = 10%%" >> 90-quota.conf
     echo -e "\tquota_status_success = DUNNO" >> 90-quota.conf
     echo -e "\tquota_status_nouser = DUNNO" >> 90-quota.conf
     echo -e "\tquota_status_overquota = \"552 5.2.2 Mailbox is full\"" >> 90-quota.conf
     echo -e "}" >> 90-quota.conf
-    echo -e "" >> 90-quota.conf
-    echo -e "" >> 90-quota.conf
-    echo -e "\tmail_plugins = \$mail_plugins quota" >> 90-quota.conf
     echo -e "" >> 90-quota.conf
     echo -e "" >> 90-quota.conf
 fi
