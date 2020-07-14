@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z "$BACKUP_SERVER" ]; then
+	echo "Tiene que indicar la variable de entorno BACKUP_SERVER"
+	exit 1
+fi
 
 cd /home/dominios
 date
@@ -10,7 +14,7 @@ do
 	cd /home/dominios/$DOMINIO
 	for USER in *
 	do
-	    /opt/dovecot/bin/doveadm -v backup -u $USER@$DOMINIO tcp:backup.existo.net:10005
+	    /opt/dovecot/bin/doveadm -v backup -u $USER@$DOMINIO $BACKUP_SERVER
 	done
 done
 

@@ -122,7 +122,8 @@ ENV NAME="mail.midominio.com" \
     AUTH_POLICY_SERVER="" \
     QUOTA_SERVICE="no" \
     QUOTA_SERVICE_PORT="10001" \
-    QUOTA=""
+    QUOTA="" \
+    BACKUP_SERVER=""
 
 EXPOSE 24 110 143 587 943 953 10005
 
