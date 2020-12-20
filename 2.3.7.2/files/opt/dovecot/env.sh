@@ -28,6 +28,8 @@ mv 20-lmtp.conf bak/20-lmtp.conf.bak
 mv 20-pop3.conf bak/20-pop3.conf.bak
 mv 90-quota.conf bak/90-quota.conf.bak
 touch 90-quota.conf
+mv 90-replication.conf bak/90-replication.conf.bak
+touch 90-replication.conf
 
 
 ################
@@ -69,7 +71,11 @@ fi
 if [ "$AUTH_DEBUG_PASSWORDS" = "yes" ]; then
     sed 's/#auth_debug_passwords = no/auth_debug_passwords= yes/' -i 10-logging.conf
 fi
-
+if [ "$DEBUG" = "yes" ]; then
+    echo -e "" >> 10-logging.conf
+    echo -e "mail_debug = yes" >> 10-logging.conf
+    echo -e "" >> 10-logging.conf
+fi
 
 ################
 # 10-mail.conf
@@ -85,6 +91,11 @@ echo -e "mail_plugins = " >> 10-mail.conf
 if [ ! -z "$QUOTA" ]; then
     echo -e "" >> 10-mail.conf
     echo -e "mail_plugins = \$mail_plugins quota" >> 10-mail.conf
+fi
+if [ "$REPLICATION" = "yes" ]; then
+    echo -e "" >> 10-mail.conf
+    echo -e "mail_plugins = \$mail_plugins notify replication" >> 10-mail.conf
+    echo -e "" >> 10-mail.conf
 fi
 echo "" >> 10-mail.conf
 echo "" >> 10-mail.conf
@@ -216,6 +227,14 @@ if [ "$QUOTA_SERVICE" = "yes" ]; then
     echo -e "}" >> 10-master.conf
 fi
 
+if [ "$REPLICATION" = "yes" ]; then
+    echo "" >> 10-master.conf
+    echo "" >> 10-master.conf
+    echo -e "service replicator {" >> 10-master.conf
+    echo -e "\tprocess_min_avail = 1" >> 10-master.conf
+    echo -e "}" >> 10-master.conf
+fi
+
 echo "" >> 10-master.conf
 echo "" >> 10-master.conf
 
@@ -314,7 +333,7 @@ fi
 
 if [ "$SUBMISSION" = "yes" ]; then
     echo "" >> 20-submission.conf
-    echo -e "protocols = \$protocols submission" >> 20-managesieve.conf
+    echo -e "protocols = \$protocols submission" >> 20--submission.conf
     echo "" >> 20-submission.conf
     echo "" >> 20-submission.conf
     echo "hostname = ${NAME}" >> 20-submission.conf
@@ -352,6 +371,39 @@ fi
 
 
 #######################
+# 90-replication.conf
+#######################
+if [ "$REPLICATION" = "yes" ]; then
+echo -e "" >> 90-replication.conf
+echo -e "service aggregator {" >> 90-replication.conf
+echo -e "\tfifo_listener replication-notify-fifo {" >> 90-replication.conf
+echo -e "\t\tuser = vmail" >> 90-replication.conf
+echo -e "\t}" >> 90-replication.conf
+echo -e "\tunix_listener replication-notify {" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "\t\tuser = vmail" >> 90-replication.conf
+echo -e "\t}" >> 90-replication.conf
+echo -e "}" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "service replicator {" >> 90-replication.conf
+echo -e "\tunix_listener replicator-doveadm {" >> 90-replication.conf
+echo -e "\t\tmode = 0600" >> 90-replication.conf
+echo -e "\t\tuser = vmail" >> 90-replication.conf
+echo -e "\t}" >> 90-replication.conf
+echo -e "}" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "plugin {" >> 90-replication.conf
+echo -e "\tmailreplica = tcp:${REPLICATION_SERVER}" >> 90-replication.conf
+echo -e "}" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+echo -e "" >> 90-replication.conf
+
+fi
+
+
+#######################
 # 90-sieve.conf
 #######################
 
@@ -360,16 +412,19 @@ if [ "$SIEVE" = "yes" ]; then
     echo -e "protocol sieve {" >> 90-sieve.conf
     echo -e "\tmanagesieve_max_line_length = 65536" >> 90-sieve.conf
     echo -e "\tmanagesieve_implementation_string = dovecot" >> 90-sieve.conf
-    echo -e "\t# log_path = /var/log/dovecot-sieve-errors.log" >> 90-sieve.conf
-    echo -e "\t# info_log_path = /var/log/dovecot-sieve.log" >> 90-sieve.conf
+    if [ "$SIEVE_LOG" = "yes" ]; then
+        echo -e "\tlog_path = /var/log/dovecot/sieve.${NAME}.log" >> 90-sieve.conf
+        echo -e "\tinfo_log_path = /var/log/dovecot/sieve-info.${NAME}.log" >> 90-sieve.conf
+    fi
     echo -e "}" >> 90-sieve.conf
     echo -e "" >> 90-sieve.conf
     echo -e "" >> 90-sieve.conf
     echo -e "plugin {" >> 90-sieve.conf
     echo -e "\tsieve = ~/dovecot.sieve" >> 90-sieve.conf
-    echo -e "\tsieve_global_path = /etc/dovecot/sieve/default.sieve" >> 90-sieve.conf
     echo -e "\tsieve_dir = ~/sieve" >> 90-sieve.conf
-    echo -e "\tsieve_global_dir = /etc/dovecot/sieve" >> 90-sieve.conf
+    if [ ! -z "$SIEVE_BEFORE" ]; then
+        echo -e "\tsieve_before = ${SIEVE_BEFORE}" >> 90-sieve.conf
+    fi
     echo -e "}" >> 90-sieve.conf
     echo -e "" >> 90-sieve.conf
     echo -e "" >> 90-sieve.conf
@@ -409,7 +464,7 @@ echo -e "" >> auth-passwdfile.conf.ext
 chown vmail.vmail /home/dominios
 
 if [ "$SIEVE" = "yes" ]; then
-    echo -e "maillog_file          = /var/log/dovecot/sieve.${NAME}.log" >> /opt/postfix/etc/main.cf
+    echo -e "maillog_file          = /var/log/dovecot/sieve.postfix.${NAME}.log" >> /opt/postfix/etc/main.cf
     echo -e "relayhost             = ${SIEVE_SMTP}" >> /opt/postfix/etc/main.cf
     echo -e "smtp_sasl_auth_enable = no" >> /opt/postfix/etc/main.cf
     echo -e "" >> /opt/postfix/etc/main.cf

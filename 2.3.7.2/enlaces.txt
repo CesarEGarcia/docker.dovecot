@@ -3,6 +3,16 @@ https://wiki.dovecot.org/Quota/Count
 https://wiki.dovecot.org/Quota/Configuration
 https://blog.sys4.de/postfix-dovecot-mailbox-quota-en.html
 
+SIEVE
+https://www.fastmail.com/help/technical/sieve-howto.html#actions
+https://wiki.dovecot.org/Pigeonhole/Sieve/Usage
+
 doveadm quota recalc -u <uid>
 
 user:{plain}pass:1000:1000::/home/user::userdb_quota_rule=*:bytes=100M
+
+
+
+testear sieve
+telnet localhost 4190
+

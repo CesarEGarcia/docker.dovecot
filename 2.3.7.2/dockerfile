@@ -26,10 +26,10 @@ RUN set -x \
     && yum -y install openssl-devel \
     \
     && cd /usr/local/src \
-    && wget https://dovecot.org/releases/2.3/dovecot-2.3.7.2.tar.gz \
-    && tar xzvf dovecot-2.3.7.2.tar.gz \
-    && rm dovecot-2.3.7.2.tar.gz \
-    && cd dovecot-2.3.7.2 \
+    && wget https://dovecot.org/releases/2.3/dovecot-2.3.11.3.tar.gz \
+    && tar xzvf dovecot-2.3.11.3.tar.gz \
+    && rm dovecot-2.3.11.3.tar.gz \
+    && cd dovecot-2.3.11.3 \
     && ./configure \
         --prefix=/opt/dovecot \
         --without-shadow \
@@ -40,20 +40,20 @@ RUN set -x \
         --without-pgsql \
         --without-sqlite \
     \
-    && cd /usr/local/src/dovecot-2.3.7.2 \
+    && cd /usr/local/src/dovecot-2.3.11.3 \
     && make \
     && make install \
-    \
     && cd /usr/local/src \
-    && wget https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
-    && tar xzvf dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
-    && rm dovecot-2.3-pigeonhole-0.5.7.2.tar.gz \
-    && cd dovecot-2.3-pigeonhole-0.5.7.2 \
+    && wget https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-0.5.11.tar.gz \
+    && tar xzvf dovecot-2.3-pigeonhole-0.5.11.tar.gz \
+    && rm dovecot-2.3-pigeonhole-0.5.11.tar.gz \
+    && cd dovecot-2.3-pigeonhole-0.5.11 \
     && ./configure \
         --prefix=/opt/pigeonhole \
         --with-dovecot=/opt/dovecot/lib/dovecot \
     && make \
     && make install \
+    && ln -s /opt/pigeonhole/bin/sievec /usr/local/bin \
     \
     && cp -av /opt/dovecot/share/doc/dovecot/example-config/* /opt/dovecot/etc/dovecot \
     && mkdir /var/log/dovecot \
@@ -111,6 +111,8 @@ ENV NAME="mail.midominio.com" \
     LMTP="no" \
     SIEVE="no" \
     SIEVE_SMTP="mx.existo.net" \
+    SIEVE_BEFORE="" \
+    SIEVE_LOG="no" \
     SUBMISSION="no" \
     DOVEADM="no" \
     DOVEADM_PORT="" \
@@ -122,7 +124,9 @@ ENV NAME="mail.midominio.com" \
     AUTH_POLICY_SERVER="" \
     QUOTA_SERVICE="no" \
     QUOTA_SERVICE_PORT="10001" \
-    QUOTA=""
+    QUOTA="" \
+    REPLICATION="no" \
+    REPLICATION_SERVER=""
 
 EXPOSE 24 110 143 587 943 953 10005
 
@@ -135,3 +139,4 @@ EXPOSE 24 110 143 587 943 953 10005
 WORKDIR /opt/dovecot
 
 CMD /opt/dovecot/env.sh && /opt/dovecot/sbin/dovecot -F
+# CMD /usr/sbin/init
