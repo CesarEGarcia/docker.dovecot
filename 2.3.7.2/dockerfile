@@ -127,6 +127,7 @@ ENV NAME="mail.midominio.com" \
     QUOTA="" \
     REPLICATION="no" \
     REPLICATION_SERVER=""
+    BACKUP_SERVER=""
 
 EXPOSE 24 110 143 587 943 953 10005
 
