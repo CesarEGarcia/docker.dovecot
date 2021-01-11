@@ -437,7 +437,7 @@ fi
 echo -e ""
 echo -e "passdb {" >> auth-passwdfile.conf.ext
 echo -e "\tdriver = passwd-file" >> auth-passwdfile.conf.ext
-echo -e "\targs = scheme=CRYPT username_format=%u ${ USERDB }" >> auth-passwdfile.conf.ext
+echo -e "\targs = scheme=CRYPT username_format=%u ${USERDB}" >> auth-passwdfile.conf.ext
 echo -e "}" >> auth-passwdfile.conf.ext
 echo -e "" >> auth-passwdfile.conf.ext
 echo -e "userdb {" >> auth-passwdfile.conf.ext
