@@ -1,0 +1,60 @@
+FROM centos:7
+
+LABEL VERSION 2.3.2.1
+
+RUN set -x \
+    && groupadd dovecot \
+    && groupadd dovenull \
+    && useradd -d /opt/dovecot -s /bin/false -g dovecot -M dovecot \
+    && useradd -d /opt/dovecot -s /bin/false -g dovenull -M dovenull \
+    \
+	&& yum -y install gcc \
+	&& yum -y install make \
+    && yum -y install wget \
+    && yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+    && yum -y install supervisor \
+    \
+    && cd /usr/local/src \
+    && wget https://www.dovecot.org/releases/2.3/dovecot-2.3.2.1.tar.gz \
+    && tar xzvf dovecot-2.3.2.1.tar.gz \
+    && rm dovecot-2.3.2.1.tar.gz \
+    && cd dovecot-2.3.2.1 \
+    && ./configure \
+        --prefix=/opt/dovecot \
+        --without-shadow \
+        --without-pam \
+        --without-gssapi \
+        --without-ldap \
+        --without-mysql \
+        --without-pgsql \
+        --without-sqlite \
+    \
+    && cd /usr/local/src/dovecot-2.3.2.1 \
+    && make \
+    && make install \
+    \
+    && yum -y remove gcc \
+    && yum -y remove make \
+    && yum -y remove wget \
+    && yum clean all
+
+COPY etc/ /opt/dovecot/etc
+COPY supervisord.conf /etc/supervisord.conf
+
+RUN yum -y install net-tools
+
+RUN ln -s /opt/dovecot/bin/doveadm /usr/bin
+
+RUN rm -Rf /usr/local/src/dovecot-2.3.2.1
+
+RUN mkdir /var/log/dovecot
+
+# Expose 24
+# Expose 143
+# Expose 110
+# Expose 993
+# Expose 995
+
+#CMD ["/usr/sbin/init"]    
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+

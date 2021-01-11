@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+
+  dovecot:
+    image:
+      dovecot:2.3.2
+    volumes:
+      - /opt/usuarios:/opt/usuarios
+      - /var/log/dovecot:/var/log/dovecot
+    ports:
+     - 110:110
+     - 143:143
+    networks:
+      - localNetwork
+
+networks:
+  localNetwork:

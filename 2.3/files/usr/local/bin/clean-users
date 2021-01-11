@@ -1,0 +1,19 @@
+#!/bin/bash
+
+cd /home/dominios
+date
+
+for DOMINIO in *
+do
+ 	echo "Purgando $DOMINIO"
+ 	cd /home/dominios/$DOMINIO
+ 	for USER in *
+ 	do
+        /opt/dovecot/bin/doveadm -v expunge -u $USER@$DOMINIO mailbox Junk savedbefore 30d
+        /opt/dovecot/bin/doveadm -v expunge -u $USER@$DOMINIO mailbox Trash savedbefore 30d
+        /opt/dovecot/bin/doveadm -v purge -u $USER@$DOMINIO
+	done
+done
+
+date
+
