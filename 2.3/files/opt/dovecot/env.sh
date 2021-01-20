@@ -243,6 +243,7 @@ echo "" >> 10-master.conf
 ###############
 # 10-ssl.conf
 ###############
+
 if [ "$SSL" = "yes" ]; then
     sed 's/#ssl = yes/ssl = yes/' -i 10-ssl.conf
     sed 's|ssl_cert =.*|ssl_cert = </etc/letsencrypt/live/'${NAME}'/fullchain.pem|' -i 10-ssl.conf
@@ -252,6 +253,17 @@ else
     sed 's|ssl_cert =.*|#ssl_cert = </etc/ssl/certs/dovecot.pem|' -i 10-ssl.conf
     sed 's|ssl_key =.*|#ssl_key = </etc/ssl/private/dovecot.pem|' -i 10-ssl.conf
 fi
+
+
+###############
+# 15-lda.conf
+###############
+echo "" >> 15-lda.conf
+echo "" >> 15-lda.conf
+echo "lda_mailbox_autocreate = yes" >> 15-lda.conf
+echo "lda_mailbox_autosubscribe = yes" >> 15-lda.conf
+echo "" >> 15-lda.conf
+echo "" >> 15-lda.conf
 
 
 ################

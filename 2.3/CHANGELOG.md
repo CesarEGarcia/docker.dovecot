@@ -1,4 +1,6 @@
 - 2.3.11.3-2
+    Activar lda_mailbox_autosuscribe en 15-lda.conf
+    Activar lda_mailbox_autocreate en 15-lda.conf
     REPLICATION="no" | "yes"
     REPLICATION_SERVER="tcp:mailbackup.ametel.es:10005"
     USERDB="/opt/dovecot/conf/passwords/%d"

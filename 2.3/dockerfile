@@ -84,6 +84,8 @@ RUN set -x \
     && make \
     && make install -non-interactive \
     && /bin/sh postfix-install -non-interactive \
+    && cd .. \
+    && rm -Rf postfix-3.4.7 \
     \
     && /opt/postfix/bin/newaliases \
     && ln -s /opt/postfix/bin/postmap /usr/local/bin \
